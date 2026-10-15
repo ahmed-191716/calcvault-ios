@@ -64,10 +64,7 @@ public final class AppShieldManager: ObservableObject {
             return
         }
         
-        // 1. إخفاء التطبيقات تماماً من الشاشة الرئيسية، مكتبة التطبيقات، ونتائج البحث
-        store.application.blockedApplications = activitySelection.applicationTokens
-        
-        // 2. درع أمان إضافي للحجب
+        // درع أمان لحجب وإخفاء التطبيقات المختارة
         store.shield.applications = activitySelection.applicationTokens
         
         isShieldActive = true
@@ -76,8 +73,7 @@ public final class AppShieldManager: ObservableObject {
     
     // MARK: - إلغاء الإخفاء واستعادة التطبيقات (Unhide All)
     public func unhideAll() {
-        // إزالة الحجب والإخفاء لتعود التطبيقات للشاشة الرئيسية
-        store.application.blockedApplications = nil
+        // إزالة الحجب لتعود التطبيقات
         store.shield.applications = nil
         
         isShieldActive = false
