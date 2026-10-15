@@ -17,6 +17,10 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Prepare App Icon
+        run: |
+          sips -s format png CalcVault/Assets.xcassets/AppIcon.appiconset/AppIcon.jpg --out CalcVault/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+
       - name: Generate Xcode Project
         run: xcodegen generate
 

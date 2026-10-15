@@ -29,6 +29,9 @@ public final class AppShieldManager: ObservableObject {
     /// حالة تفويض الصلاحية من آبل
     @Published public var isAuthorized: Bool = false
     
+    /// رسالة تشخيص الخطأ في حال رفض النظام للأذونات
+    @Published public var authorizationError: String? = nil
+    
     private init() {
         // استرجاع التطبيقات المحفوظة سابقاً
         if let data = UserDefaults.standard.data(forKey: kSelectedAppsStorageKey),
@@ -47,9 +50,15 @@ public final class AppShieldManager: ObservableObject {
         do {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
             checkAuthorization()
+            if !isAuthorized {
+                self.authorizationError = "لم يتم تفعيل الإذن من النظام. تقيّد آبل واجهات Screen Time على الحسابات المجانية خارج المتجر."
+            } else {
+                self.authorizationError = nil
+            }
         } catch {
             print("خطأ في تفويض FamilyControls: \(error.localizedDescription)")
             self.isAuthorized = false
+            self.authorizationError = "تقيّد آبل صلاحية FamilyControls على حسابات Apple ID المجانية عند التثبيت الجانبي (\(error.localizedDescription))."
         }
     }
     

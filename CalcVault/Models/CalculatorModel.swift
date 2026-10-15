@@ -42,18 +42,25 @@ public enum CalcOperation: Hashable {
 public final class CalculatorModel: ObservableObject {
     
     @Published public var displayText: String = "0"
+    @Published public var activeOperation: CalcOperation? = nil
     
     // تسجيل الأرقام المتتالية لاكتشاف الرمز السري
     private var enteredDigitSequence: String = ""
     
-    private var currentNumber: Double = 0
-    private var pendingOperation: CalcOperation? = nil
     private var storedNumber: Double? = nil
     private var isTypingFreshNumber: Bool = true
     
+    public var clearButtonTitle: String {
+        if isTypingFreshNumber && displayText == "0" {
+            return "AC"
+        } else {
+            return "C"
+        }
+    }
+    
     // MARK: - التعامل مع ضغط الأزرار
     public func buttonTapped(_ button: CalcButtonType) {
-        let generator = UIImpactFeedbackGenerator(style: .light)
+        let generator = UIImpactFeedbackGenerator(style: .rigid)
         generator.prepare()
         generator.impactOccurred()
         
@@ -76,19 +83,21 @@ public final class CalculatorModel: ObservableObject {
     }
     
     private func handleDigit(_ n: Int) {
+        activeOperation = nil
         enteredDigitSequence.append("\(n)")
         
         if isTypingFreshNumber || displayText == "0" {
             displayText = "\(n)"
             isTypingFreshNumber = false
         } else {
-            if displayText.count < 10 {
+            if displayText.replacingOccurrences(of: ".", with: "").count < 9 {
                 displayText.append("\(n)")
             }
         }
     }
     
     private func handleDecimal() {
+        activeOperation = nil
         if isTypingFreshNumber {
             displayText = "0."
             isTypingFreshNumber = false
@@ -98,11 +107,18 @@ public final class CalculatorModel: ObservableObject {
     }
     
     private func handleClear() {
-        displayText = "0"
-        storedNumber = nil
-        pendingOperation = nil
-        isTypingFreshNumber = true
-        enteredDigitSequence = ""
+        if displayText != "0" && !isTypingFreshNumber {
+            // مسح الشاشة الحالية فقط (C)
+            displayText = "0"
+            isTypingFreshNumber = true
+        } else {
+            // مسح كلي (AC)
+            displayText = "0"
+            storedNumber = nil
+            activeOperation = nil
+            isTypingFreshNumber = true
+            enteredDigitSequence = ""
+        }
     }
     
     private func handleToggleSign() {
@@ -121,15 +137,15 @@ public final class CalculatorModel: ObservableObject {
     
     private func handleOperation(_ op: CalcOperation) {
         if let val = Double(displayText) {
-            if let stored = storedNumber, let pending = pendingOperation, !isTypingFreshNumber {
-                let res = calculate(stored, pending, val)
+            if let stored = storedNumber, let currentOp = activeOperation, !isTypingFreshNumber {
+                let res = calculate(stored, currentOp, val)
                 storedNumber = res
                 displayText = formatResult(res)
             } else {
                 storedNumber = val
             }
         }
-        pendingOperation = op
+        activeOperation = op
         isTypingFreshNumber = true
     }
     
@@ -143,24 +159,25 @@ public final class CalculatorModel: ObservableObject {
                 if AuthManager.shared.setMasterPasscode(secretCandidate) {
                     displayText = "0"
                     enteredDigitSequence = ""
+                    activeOperation = nil
                     return
                 }
             }
         } else {
             // فحص المصادقة ضد الرمز السري الحقيقي أو رمز الإكراه
             if !secretCandidate.isEmpty && AuthManager.shared.evaluatePasscode(secretCandidate) {
-                // تم الفتح بنجاح! يتم تصفير الآلة
+                // تم الفتح بنجاح! يتم تصفير الآلة فوراً
                 handleClear()
                 return
             }
         }
         
         // 2. إذا لم يكن رمزاً سرياً، نقوم بالحساب الطبيعي كأي آلة حاسبة دون أن يشك أحد!
-        if let stored = storedNumber, let op = pendingOperation, let current = Double(displayText) {
+        if let stored = storedNumber, let op = activeOperation, let current = Double(displayText) {
             let result = calculate(stored, op, current)
             displayText = formatResult(result)
             storedNumber = nil
-            pendingOperation = nil
+            activeOperation = nil
             isTypingFreshNumber = true
         }
         
@@ -181,6 +198,6 @@ public final class CalculatorModel: ObservableObject {
         if val.truncatingRemainder(dividingBy: 1) == 0 && val < Double(Int.max) && val > Double(Int.min) {
             return "\(Int(val))"
         }
-        return String(format: "%.4f", val).replacingOccurrences(of: "\\.?0+$", with: "", options: .regularExpression)
+        return String(format: "%.6g", val)
     }
 }
