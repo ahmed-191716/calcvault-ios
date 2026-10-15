@@ -10,10 +10,15 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: CalcVault
+    entitlements:
+      path: CalcVault.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.developer.family-controls.development: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.calcvault.app
-        PRODUCT_NAME: Calculator
+        PRODUCT_NAME: "Calculator"
         INFOPLIST_FILE: CalcVault/Info.plist
         CODE_SIGN_ENTITLEMENTS: CalcVault.entitlements
         SWIFT_VERSION: "5.0"

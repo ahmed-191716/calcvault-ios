@@ -9,7 +9,20 @@ public struct VaultHomeView: View {
     
     public var body: some View {
         TabView {
-            // التبويب 1: إخفاء التطبيقات
+            // التبويب 1: قاذف التطبيقات السري المباشر (بدون بصمة!)
+            NavigationView {
+                SecretAppLauncherView()
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            panicLockToolbarButton
+                        }
+                    }
+            }
+            .tabItem {
+                Label("تطبيقاتي", systemImage: "square.grid.2x2.fill")
+            }
+            
+            // التبويب 2: التحكم بصلاحية إخفاء التطبيقات من النظام
             NavigationView {
                 AppShieldView()
                     .toolbar {
@@ -19,10 +32,10 @@ public struct VaultHomeView: View {
                     }
             }
             .tabItem {
-                Label("إخفاء التطبيقات", systemImage: "eye.slash.fill")
+                Label("درع الإخفاء", systemImage: "eye.slash.fill")
             }
             
-            // التبويب 2: الملاحظات السرية
+            // التبويب 3: الملاحظات المشفرة
             NavigationView {
                 SecretNotesView()
                     .toolbar {
@@ -32,10 +45,10 @@ public struct VaultHomeView: View {
                     }
             }
             .tabItem {
-                Label("ملاحظات مشفرة", systemImage: "note.text")
+                Label("ملاحظات", systemImage: "note.text")
             }
             
-            // التبويب 3: الإعدادات والأمان
+            // التبويب 4: الأمان وتغيير الرمز
             NavigationView {
                 VaultSettingsView()
                     .toolbar {

@@ -41,5 +41,14 @@
 	<string>UIStatusBarStyleLightContent</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+		<string>tg</string>
+		<string>snapchat</string>
+		<string>instagram</string>
+		<string>twitter</string>
+		<string>youtube</string>
+	</array>
 </dict>
 </plist>
